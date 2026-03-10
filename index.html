@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deutsch Algorithm — Quantum Computer Simulator</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script','noscript','style','textarea']
+      },
+      startup: {
+        typeset: false
+      }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js" crossorigin="anonymous"></script>
+
+  <!-- marked.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js" crossorigin="anonymous"></script>
+
+  <!-- Our styles -->
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+
+<div class="particle-container" id="particles"></div>
+
+<div class="container">
+  <header>
+    <div class="header-badge">Quantum Computing Simulator</div>
+    <h1>Deutsch Algorithm</h1>
+  </header>
+
+  <!-- Function selector -->
+  <div class="selector-section">
+    <span class="selector-label">Oracle f(x) :</span>
+    <div class="fn-buttons">
+      <button class="fn-btn constant-type selected" data-fn="0">f(x) = 0 <span style="font-size:9px;opacity:0.5">[constant]</span></button>
+      <button class="fn-btn constant-type" data-fn="1">f(x) = 1 <span style="font-size:9px;opacity:0.5">[constant]</span></button>
+      <button class="fn-btn balanced-type" data-fn="x">f(x) = x <span style="font-size:9px;opacity:0.5">[balanced]</span></button>
+      <button class="fn-btn balanced-type" data-fn="1-x">f(x) = 1−x <span style="font-size:9px;opacity:0.5">[balanced]</span></button>
+    </div>
+    <button class="run-btn" id="runBtn">▶ Run Quantum Computer</button>
+  </div>
+
+  <!-- Step indicator -->
+  <div class="steps-indicator" id="stepsIndicator">
+    <div class="step-dot" id="dot0"></div>
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+    <div class="step-dot" id="dot4"></div>
+  </div>
+
+  <!-- Quantum Circuit -->
+  <div class="circuit-section">
+    <div class="circuit-title">// Quantum Circuit  <span style="color:var(--text-dim);font-size:9px;letter-spacing:1px;opacity:0.7">— hover gates for details</span></div>
+    <div class="circuit-diagram">
+      <div class="qubit-row">
+        <span class="qubit-label">|0⟩ —</span>
+        <div class="wire-segment" style="width:20px"></div>
+        <div class="gate gate-h" id="g-h1" data-gate="h">H</div>
+        <div class="wire-segment" style="flex:1"></div>
+        <div class="gate gate-uf" id="g-uf1" data-gate="uf" style="position:relative">
+          U<sub>f</sub>
+          <div class="uf-bracket"></div>
+        </div>
+        <div class="wire-segment" style="flex:1"></div>
+        <div class="gate gate-h" id="g-h2" data-gate="h">H</div>
+        <div class="wire-segment" style="flex:1"></div>
+        <div class="gate gate-measure" id="g-m1" data-gate="m">M</div>
+        <div class="wire-segment" style="width:20px"></div>
+      </div>
+      <div class="qubit-row">
+        <span class="qubit-label">|1⟩ —</span>
+        <div class="wire-segment" style="width:20px"></div>
+        <div class="gate gate-h" id="g-h3" data-gate="h">H</div>
+        <div class="wire-segment" style="flex:1"></div>
+        <div class="gate gate-uf" id="g-uf2" data-gate="uf" style="position:relative">
+          U<sub>f</sub>
+          <div class="uf-bracket"></div>
+        </div>
+        <div class="wire-segment" style="flex:1"></div>
+        <div class="gate" style="width:48px;background:transparent;border-color:transparent;margin:0 4px"></div>
+        <div class="wire-segment" style="flex:1"></div>
+        <div class="gate" style="width:48px;background:transparent;border-color:transparent;margin:0 4px"></div>
+        <div class="wire-segment" style="width:20px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main visualization grid -->
+  <div class="main-grid">
+    <!-- Bloch Spheres -->
+    <div class="bloch-panel">
+      <div class="panel-title">// Bloch Sphere Visualization</div>
+      <div class="spheres-row">
+        <div class="sphere-wrap">
+          <span class="sphere-label">INPUT QUBIT</span>
+          <canvas class="bloch" id="bloch0" width="160" height="160"></canvas>
+        </div>
+        <div class="sphere-wrap">
+          <span class="sphere-label">ANCILLA QUBIT</span>
+          <canvas class="bloch" id="bloch1" width="160" height="160"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- State Vector Panel -->
+    <div class="state-panel">
+      <div class="panel-title">// State Vector |ψ⟩</div>
+      <div class="state-bars" id="stateBars">
+        <div class="state-row">
+          <span class="state-ket">|00⟩</span>
+          <div class="state-bar-track"><div class="state-bar-fill pos" id="bar00" style="width:0%"></div></div>
+          <span class="state-val" id="val00">0.00</span>
+          <span class="state-prob" id="prob00">0%</span>
+        </div>
+        <div class="state-row">
+          <span class="state-ket">|01⟩</span>
+          <div class="state-bar-track"><div class="state-bar-fill pos" id="bar01" style="width:100%"></div></div>
+          <span class="state-val" id="val01">1.00</span>
+          <span class="state-prob" id="prob01">100%</span>
+        </div>
+        <div class="state-row">
+          <span class="state-ket">|10⟩</span>
+          <div class="state-bar-track"><div class="state-bar-fill pos" id="bar10" style="width:0%"></div></div>
+          <span class="state-val" id="val10">0.00</span>
+          <span class="state-prob" id="prob10">0%</span>
+        </div>
+        <div class="state-row">
+          <span class="state-ket">|11⟩</span>
+          <div class="state-bar-track"><div class="state-bar-fill pos" id="bar11" style="width:0%"></div></div>
+          <span class="state-val" id="val11">0.00</span>
+          <span class="state-prob" id="prob11">0%</span>
+        </div>
+      </div>
+
+      <div class="matrix-section">
+        <div class="matrix-label">Complex amplitudes [a, b, c, d]</div>
+        <div class="complex-row" id="complexRow">
+          <span class="complex-val">a = <span id="ca">0</span></span>
+          <span class="complex-val">b = <span id="cb">1</span></span>
+          <span class="complex-val">c = <span id="cc">0</span></span>
+          <span class="complex-val">d = <span id="cd">0</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explanation panel -->
+  <div class="explain-panel">
+    <div class="explain-step visible" id="explainStep">Ready</div>
+    <div class="explain-text md-content visible" id="explainText">
+      <p>Select an oracle function above and press <strong>Run Quantum Computer</strong> to begin. The Deutsch algorithm determines whether \(f(x)\) is <em>constant</em> or <em>balanced</em> using only <strong>one</strong> oracle query — impossible classically without two queries.</p>
+    </div>
+  </div>
+
+  <!-- Result panel -->
+  <div class="result-panel" id="resultPanel">
+    <div class="result-inner">
+      <div class="result-block">
+        <div class="result-label">Quantum Prediction</div>
+        <div class="result-value" id="resultValue">CONSTANT</div>
+        <div class="result-fn" id="resultFn">Your function: f(x) = 0</div>
+      </div>
+      <div class="advantage-box">
+        <div class="advantage-title">// Quantum Advantage</div>
+        <div class="advantage-line">Classical: <span>2 evaluations needed</span></div>
+        <div class="advantage-line">Quantum: <span>1 evaluation needed</span></div>
+        <div class="advantage-line" style="margin-top:6px;color:var(--accent3)">2× speedup achieved ✓</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
