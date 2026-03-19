@@ -2,7 +2,7 @@
 
 ![](screenshot1.png)
 
-An interactive, educational visualization of the **Deutsch Algorithm** running entirely in the browser. No frameworks, no build tools, no dependencies beyond CDN-loaded MathJax and marked.js.
+An interactive, educational visualization of the **Deutsch Algorithm** running entirely in the browser. No frameworks, no build tools, no dependencies beyond CDN-loaded MathJax and marked.js. [Click here](https://69bbda764f9a1ab69d9868f5--superb-capybara-d357aa.netlify.app/) to test the simulator! 
 
 ## What is the Deutsch Algorithm?
 
